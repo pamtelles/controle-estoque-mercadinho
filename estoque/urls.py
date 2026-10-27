@@ -7,4 +7,9 @@ urlpatterns = [
         views.cadastrar_produto,
         name="cadastrar_produto",
     ),
+    path(
+        "estoque/",
+        views.consultar_estoque,
+        name="consultar_estoque",
+    ),
 ]

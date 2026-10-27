@@ -1,3 +1,4 @@
+from .models import Produto
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
@@ -21,4 +22,22 @@ def cadastrar_produto(request):
         request,
         "estoque/cadastrar_produto.html",
         {"form": form},
+    )
+
+@login_required
+def consultar_estoque(request):
+    busca = request.GET.get("busca", "").strip()
+
+    produtos = Produto.objects.filter(ativo=True)
+
+    if busca:
+        produtos = produtos.filter(nome__icontains=busca)
+
+    return render(
+        request,
+        "estoque/consultar_estoque.html",
+        {
+            "produtos": produtos,
+            "busca": busca,
+        },
     )
