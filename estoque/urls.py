@@ -12,4 +12,10 @@ urlpatterns = [
         views.consultar_estoque,
         name="consultar_estoque",
     ),
+
+    path(
+    "movimentacoes/nova/",
+    views.registrar_movimentacao,
+    name="registrar_movimentacao",
+),
 ]
