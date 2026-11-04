@@ -257,3 +257,25 @@ class EstoqueTests(TestCase):
 
         self.assertEqual(resposta.status_code, 302)
         self.assertIn("/admin/login/", resposta.url)
+
+
+    def test_tipo_movimentacao_invalido_e_bloqueado(self):
+        resposta = self.client.post(
+            reverse("registrar_movimentacao"),
+            {
+                "produto": self.produto.pk,
+                "tipo": "AJUSTE_INVALIDO",
+                "quantidade": 5,
+                "observacao": "Teste de segurança",
+            }
+        )
+
+        self.produto.refresh_from_db()
+
+        self.assertEqual(resposta.status_code, 200)
+        self.assertEqual(self.produto.quantidade_atual, 20)
+        self.assertEqual(MovimentacaoEstoque.objects.count(), 0)
+        self.assertIn(
+            "tipo",
+            resposta.context["form"].errors
+        )
