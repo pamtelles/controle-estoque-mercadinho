@@ -226,3 +226,34 @@ class EstoqueTests(TestCase):
             resposta.context["movimentacoes"][0].tipo,
             "SAIDA"
         )
+
+    def test_dashboard_exibe_indicadores(self):
+        resposta = self.client.get(reverse("dashboard"))
+
+        self.assertEqual(resposta.status_code, 200)
+        self.assertEqual(resposta.context["total_produtos"], 1)
+        self.assertEqual(
+            resposta.context["produtos_estoque_baixo"], 0
+        )
+        self.assertEqual(resposta.context["total_unidades"], 20)
+
+    def test_dashboard_atualiza_indicadores(self):
+        self.produto.quantidade_atual = 4
+        self.produto.save()
+
+        resposta = self.client.get(reverse("dashboard"))
+
+        self.assertEqual(resposta.status_code, 200)
+        self.assertEqual(resposta.context["total_produtos"], 1)
+        self.assertEqual(
+            resposta.context["produtos_estoque_baixo"], 1
+        )
+        self.assertEqual(resposta.context["total_unidades"], 4)
+
+    def test_dashboard_exige_login(self):
+        self.client.logout()
+
+        resposta = self.client.get(reverse("dashboard"))
+
+        self.assertEqual(resposta.status_code, 302)
+        self.assertIn("/admin/login/", resposta.url)

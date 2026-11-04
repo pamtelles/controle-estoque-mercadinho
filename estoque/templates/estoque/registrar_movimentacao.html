@@ -38,11 +38,23 @@
             <button type="submit" class="btn btn-primary w-100 py-3">
                 Confirmar movimentação
             </button>
+
+            <a href="{% url 'consultar_estoque' %}" class="btn btn-outline-secondary mt-3">
+            Voltar para consulta de estoque
+            </a>
+            
+            <a href="{% url 'dashboard' %}"
+            class="btn btn-outline-secondary">
+                Voltar ao Dashboard
+            </a>
+
+            <a href="{% url 'historico_movimentacoes' %}"
+            class="btn btn-outline-primary">
+                Ver histórico
+            </a>        
         </form>
 
-        <a href="{% url 'consultar_estoque' %}" class="btn btn-outline-secondary mt-3">
-            Voltar para consulta de estoque
-        </a>
+        
     </main>
 
 </body>

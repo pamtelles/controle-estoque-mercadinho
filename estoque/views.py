@@ -1,12 +1,11 @@
 from django.db import transaction
-from django.db.models import F
+from django.db.models import F, Sum
 from django.db.models.functions import Greatest
 from .forms import MovimentacaoForm
 from .models import Produto, MovimentacaoEstoque
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
-
 from .forms import ProdutoForm
 
 
@@ -118,5 +117,29 @@ def historico_movimentacoes(request):
             "movimentacoes": movimentacoes,
             "busca": busca,
             "tipo": tipo,
+        }
+    )
+
+@login_required
+def dashboard(request):
+    produtos = Produto.objects.filter(ativo=True)
+
+    total_produtos = produtos.count()
+
+    produtos_estoque_baixo = produtos.filter(
+        quantidade_atual__lte=F("estoque_minimo")
+    ).count()
+
+    total_unidades = produtos.aggregate(
+        total=Sum("quantidade_atual")
+    )["total"] or 0
+
+    return render(
+        request,
+        "estoque/dashboard.html",
+        {
+            "total_produtos": total_produtos,
+            "produtos_estoque_baixo": produtos_estoque_baixo,
+            "total_unidades": total_unidades,
         }
     )
