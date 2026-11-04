@@ -18,4 +18,9 @@ urlpatterns = [
     views.registrar_movimentacao,
     name="registrar_movimentacao",
 ),
+
+path("movimentacoes/historico/", 
+     views.historico_movimentacoes, 
+     name="historico_movimentacoes"
+),
 ]

@@ -2,7 +2,7 @@ from django.db import transaction
 from django.db.models import F
 from django.db.models.functions import Greatest
 from .forms import MovimentacaoForm
-from .models import Produto
+from .models import Produto, MovimentacaoEstoque
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
@@ -88,4 +88,35 @@ def registrar_movimentacao(request):
         request,
         "estoque/registrar_movimentacao.html",
         {"form": form},
+    )
+
+
+
+@login_required
+def historico_movimentacoes(request):
+    busca = request.GET.get("busca", "").strip()
+    tipo = request.GET.get("tipo", "").strip()
+
+    movimentacoes = (
+        MovimentacaoEstoque.objects
+        .select_related("produto")
+        .order_by("-data_movimentacao")
+    )
+
+    if busca:
+        movimentacoes = movimentacoes.filter(
+            produto__nome__icontains=busca
+        )
+
+    if tipo in ["ENTRADA", "SAIDA"]:
+        movimentacoes = movimentacoes.filter(tipo=tipo)
+
+    return render(
+        request,
+        "estoque/historico_movimentacoes.html",
+        {
+            "movimentacoes": movimentacoes,
+            "busca": busca,
+            "tipo": tipo,
+        }
     )

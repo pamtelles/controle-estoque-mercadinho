@@ -117,3 +117,112 @@ class EstoqueTests(TestCase):
 
         self.assertEqual(resposta.status_code, 302)
         self.assertIn("/admin/login/", resposta.url)
+
+
+
+    def test_historico_exibe_movimentacoes(self):
+        MovimentacaoEstoque.objects.create(
+            produto=self.produto,
+            tipo="ENTRADA",
+            quantidade=10
+        )
+
+        resposta = self.client.get(
+            reverse("historico_movimentacoes")
+        )
+
+        self.assertEqual(resposta.status_code, 200)
+        self.assertContains(resposta, "Arroz Branco 5 kg")
+        self.assertContains(resposta, "Entrada")
+
+    def test_historico_filtra_por_entrada(self):
+        MovimentacaoEstoque.objects.create(
+            produto=self.produto,
+            tipo="ENTRADA",
+            quantidade=10
+        )
+        MovimentacaoEstoque.objects.create(
+            produto=self.produto,
+            tipo="SAIDA",
+            quantidade=3
+        )
+
+        resposta = self.client.get(
+            reverse("historico_movimentacoes"),
+            {"tipo": "ENTRADA"}
+        )
+
+        self.assertEqual(resposta.status_code, 200)
+        self.assertEqual(
+            len(resposta.context["movimentacoes"]),
+            1
+        )
+        self.assertEqual(
+            resposta.context["movimentacoes"][0].tipo,
+            "ENTRADA"
+        )
+
+    def test_historico_filtra_por_nome_produto(self):
+        outro_produto = Produto.objects.create(
+            nome="Feijão Carioca 1 kg",
+            categoria="Alimentos",
+            preco_venda=Decimal("8.90"),
+            quantidade_atual=4,
+            estoque_minimo=5
+        )
+
+        MovimentacaoEstoque.objects.create(
+            produto=self.produto,
+            tipo="ENTRADA",
+            quantidade=10
+        )
+        MovimentacaoEstoque.objects.create(
+            produto=outro_produto,
+            tipo="ENTRADA",
+            quantidade=5
+        )
+
+        resposta = self.client.get(
+            reverse("historico_movimentacoes"),
+            {"busca": "Arroz"}
+        )
+
+        self.assertEqual(resposta.status_code, 200)
+        self.assertEqual(
+            len(resposta.context["movimentacoes"]),
+            1
+        )
+        self.assertEqual(
+            resposta.context["movimentacoes"][0].produto.nome,
+            "Arroz Branco 5 kg"
+        )
+
+    def test_historico_combina_filtros(self):
+        MovimentacaoEstoque.objects.create(
+            produto=self.produto,
+            tipo="ENTRADA",
+            quantidade=10
+        )
+        MovimentacaoEstoque.objects.create(
+            produto=self.produto,
+            tipo="SAIDA",
+            quantidade=3
+        )
+
+        resposta = self.client.get(
+            reverse("historico_movimentacoes"),
+            {
+                "busca": "Arroz",
+                "tipo": "SAIDA"
+            }
+        )
+
+        self.assertEqual(resposta.status_code, 200)
+        self.assertEqual(
+            len(resposta.context["movimentacoes"]),
+            1
+        )
+        self.assertEqual(
+            resposta.context["movimentacoes"][0].tipo,
+            "SAIDA"
+        )
