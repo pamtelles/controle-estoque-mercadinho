@@ -71,6 +71,9 @@ def registrar_movimentacao(request):
                 elif movimentacao.tipo == "ENTRADA":
                     produto.quantidade_atual += movimentacao.quantidade
 
+                else:
+                    form.add_error("tipo", "Tipo de movimentação inválido.")
+
                 if not form.errors:
                     produto.save(update_fields=["quantidade_atual"])
                     movimentacao.save()
@@ -88,7 +91,6 @@ def registrar_movimentacao(request):
         "estoque/registrar_movimentacao.html",
         {"form": form},
     )
-
 
 
 @login_required
