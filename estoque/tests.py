@@ -279,3 +279,37 @@ class EstoqueTests(TestCase):
             "tipo",
             resposta.context["form"].errors
         )
+from django.contrib.auth import get_user_model
+from django.test import TestCase
+from django.urls import reverse
+
+from .models import Produto
+
+
+class CodigoBarrasTests(TestCase):
+
+    def setUp(self):
+        self.usuario = get_user_model().objects.create_user(
+            username="teste_codigo_barras",
+            password="SenhaTeste123!"
+        )
+        self.client.force_login(self.usuario)
+
+        self.produto = Produto.objects.create(
+            nome="Leite Integral 1 L",
+            codigo_barras="7891234567895",
+            categoria="Laticínios",
+            preco_venda="5.99",
+            quantidade_atual=12,
+            estoque_minimo=5,
+            ativo=True,
+        )
+
+    def test_buscar_produto_pelo_codigo_de_barras(self):
+        resposta = self.client.get(
+            reverse("consultar_estoque"),
+            {"busca": "7891234567895"}
+        )
+
+        self.assertEqual(resposta.status_code, 200)
+        self.assertContains(resposta, "Leite Integral 1 L")

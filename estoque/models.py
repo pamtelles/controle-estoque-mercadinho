@@ -17,6 +17,16 @@ class Produto(models.Model):
     def __str__(self):
         return self.nome
 
+    
+    codigo_barras = models.CharField(
+        max_length=50,
+        blank=True,
+        null=True,
+        unique=True,
+        verbose_name="Código de barras"
+    )
+
+
     class Meta:
         ordering = ["nome"]
         verbose_name = "Produto"

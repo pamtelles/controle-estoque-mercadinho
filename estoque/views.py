@@ -1,5 +1,5 @@
 from django.db import transaction
-from django.db.models import F, Sum
+from django.db.models import F, Sum, Q
 from django.db.models.functions import Greatest
 from .forms import MovimentacaoForm
 from .models import Produto, MovimentacaoEstoque
@@ -34,7 +34,10 @@ def consultar_estoque(request):
     produtos = Produto.objects.filter(ativo=True)
 
     if busca:
-        produtos = produtos.filter(nome__icontains=busca)
+        produtos = produtos.filter(
+            Q(nome__icontains=busca) |
+            Q(codigo_barras__iexact=busca)
+        )
 
     return render(
         request,
